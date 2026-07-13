@@ -3,7 +3,11 @@
 **FrameFlow** — локальная студия для создания длинных видео из цепочки AI-клипов.  
 Склейка кадров, персонажи, автосохранение промптов, продолжение с места остановки.
 
-![FrameFlow](https://img.shields.io/badge/version-1.0-blue) ![Python](https://img.shields.io/badge/python-3.10+-green)
+[![Release](https://img.shields.io/github/v/release/skintar/FrameFlow)](https://github.com/skintar/FrameFlow/releases/latest)
+![Python](https://img.shields.io/badge/python-3.10+-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+**Скачать:** [последний релиз](https://github.com/skintar/FrameFlow/releases/latest) · **Демо:** запустите `FrameFlow.bat` → http://127.0.0.1:8765
 
 ## Запуск за 1 клик (Windows)
 
@@ -81,7 +85,21 @@ FrameFlow/
 
 - Для длинных роликов используйте модели с **цепочкой кадров** (Seedance, Wan)
 - Указывайте в промпте клипа #1, кто где на коллаже персонажей
-- При 88 клипах — не закрывайте `FrameFlow.bat`; при сбое просто нажмите «Начать генерацию» снова
+- При сбое генерации нажмите «Начать генерацию» снова — продолжит с последнего готового клипа
+
+## Поделиться
+
+Если FrameFlow пригодился — поставьте ⭐ на GitHub, это лучшая бесплатная реклама для проекта.
+
+**Ссылка на репозиторий:** https://github.com/skintar/FrameFlow
+
+**Скачать релиз:** https://github.com/skintar/FrameFlow/releases/latest
+
+Готовый текст для поста:
+
+> FrameFlow — бесплатная локальная студия для длинных AI-видео.  
+> Цепочка кадров, персонажи, AITunnel / свой API. Запуск одним файлом.  
+> https://github.com/skintar/FrameFlow
 
 ## Лицензия
 
