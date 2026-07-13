@@ -1,7 +1,7 @@
 # FrameFlow
 
 **FrameFlow** — локальная студия для создания длинных видео из цепочки AI-клипов.  
-Склейка кадров, персонажи, автосохранение промптов, продолжение с места остановки.
+Склейка кадров, персонажи, автосохранение промптов.
 
 ![FrameFlow](https://img.shields.io/badge/version-1.0-blue) ![Python](https://img.shields.io/badge/python-3.10+-green)
 
