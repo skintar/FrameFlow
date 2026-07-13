@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FrameFlow — студия цепочной генерации видео</title>
+  <link rel="icon" href="/favicon.ico" type="image/svg+xml" />
+  <link rel="stylesheet" href="/static/styles.css?v=1" />
+</head>
+<body>
+  <div id="toast" class="toast hidden"></div>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-settings></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Настройки API</h2>
+        <button type="button" class="btn icon" id="btnCloseSettings" aria-label="Закрыть">×</button>
+      </div>
+      <p class="modal-lead">Выберите сервис генерации и вставьте ключ. Настройки сохраняются в файл <code>.env</code> рядом с программой.</p>
+
+      <label class="field">
+        <span>Провайдер</span>
+        <select id="settingsProvider"></select>
+      </label>
+
+      <div id="customProviderFields" class="hidden">
+        <label class="field">
+          <span>Base URL API</span>
+          <input id="settingsBaseUrl" type="url" placeholder="https://api.example.com/v1" />
+        </label>
+        <label class="field">
+          <span>URL каталога моделей (необязательно)</span>
+          <input id="settingsModelsUrl" type="url" placeholder="https://api.example.com/v1/models" />
+        </label>
+      </div>
+
+      <label class="field">
+        <span>API-ключ</span>
+        <input id="settingsApiKey" type="password" placeholder="sk-..." autocomplete="off" />
+        <small class="hint" id="settingsKeyHint"></small>
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="btnTestApi">Проверить подключение</button>
+        <button type="button" class="btn primary" id="btnSaveSettings">Сохранить</button>
+      </div>
+      <p class="hint center" id="settingsEnvPath"></p>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <div class="logo-mark">FF</div>
+        <div>
+          <div class="logo">FrameFlow</div>
+          <div class="tagline">Цепочная генерация видео из клипов</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="status-pill" id="apiStatus">...</div>
+        <button class="btn ghost sm" id="btnSettings" type="button">⚙ Настройки</button>
+        <button class="btn ghost sm" id="btnRefreshModels" type="button">↻ Модели</button>
+      </div>
+    </header>
+
+    <div id="onboarding" class="onboarding hidden">
+      <div class="onboarding-inner">
+        <strong>Добро пожаловать в FrameFlow</strong>
+        <span>Для начала укажите API-ключ в настройках — без него генерация не запустится.</span>
+        <button class="btn primary sm" id="btnOnboardingSettings" type="button">Открыть настройки</button>
+      </div>
+    </div>
+
+    <nav class="steps">
+      <button class="step active" data-step="1"><span class="step-num">1</span> Проект</button>
+      <button class="step" data-step="2"><span class="step-num">2</span> Клипы</button>
+      <button class="step" data-step="3"><span class="step-num">3</span> Генерация</button>
+    </nav>
+
+    <section class="panel active" id="step1">
+      <div class="layout-main">
+        <div class="main-col">
+          <h1>Новый проект</h1>
+          <p class="subtitle">Выберите модель и длительность — стоимость считается сразу. Готовые клипы склеиваются в одно видео.</p>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Название</span>
+              <input id="projectTitle" type="text" value="Мой проект" />
+            </label>
+            <label class="field">
+              <span>Стиль</span>
+              <select id="styleSelect"></select>
+            </label>
+          </div>
+
+          <h3 class="section-title">Модель <span class="badge" id="modelCountBadge">0</span></h3>
+          <div id="modelGrid" class="model-grid">
+            <div class="model-skeleton">Загрузка моделей...</div>
+          </div>
+          <input type="hidden" id="modelSelect" value="seedance-1-5-pro" />
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Разрешение</span>
+              <select id="sizeSelect"></select>
+            </label>
+            <label class="field">
+              <span>Длина одного клипа</span>
+              <select id="clipSeconds"></select>
+              <div class="range-labels">
+                <span id="clipSecondsVal">4 сек</span>
+                <span class="muted" id="durationHint">—</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="grid-2">
+            <label class="field">
+              <span>Количество клипов</span>
+              <input id="clipCount" type="number" min="1" max="200" value="5" />
+            </label>
+            <label class="field">
+              <span>Итоговая длина (сек)</span>
+              <input id="targetTotal" type="number" min="4" max="3600" value="20" />
+            </label>
+          </div>
+
+          <div class="calc-card">
+            <h3>Стоимость</h3>
+            <div class="price-row">
+              <div class="price-box">
+                <div class="price-label">За клип</div>
+                <div class="price-value" id="costClipLabel">—</div>
+              </div>
+              <div class="price-box main">
+                <div class="price-label">Весь проект</div>
+                <div class="price-value" id="costTotalLabel">—</div>
+              </div>
+              <div class="price-box">
+                <div class="price-label">₽/сек</div>
+                <div class="price-value sm" id="ppsLabel">—</div>
+              </div>
+            </div>
+            <div class="calc-meta">
+              <span id="totalLabel">—</span> ·
+              <span id="effectiveSecLabel">—</span> ·
+              <span id="chainBadge" class="badge ok">цепочка</span>
+            </div>
+            <div class="calc-warning hidden" id="calcWarning"></div>
+          </div>
+
+          <button class="btn primary wide" id="btnToStep2">Далее → Промпты и персонажи</button>
+        </div>
+
+        <aside class="sidebar">
+          <h3>Недавние проекты</h3>
+          <p class="hint">Нажмите на проект — откроются все промпты. Генерация продолжится с последнего готового клипа.</p>
+          <div id="recentProjects" class="recent-list">
+            <div class="muted">Пока нет проектов</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="panel" id="step2">
+      <h1>Клипы <span id="clipCountBadge" class="badge">0</span></h1>
+      <p class="subtitle" id="clipsHint">Клип #1 — с нуля. Далее — продолжение с последнего кадра (цепочка).</p>
+
+      <div class="characters-card">
+        <div class="characters-header">
+          <div>
+            <h3>Персонажи проекта</h3>
+            <p class="muted small">Добавьте фото героев (3+ — автоколлаж). На клипе #1 уходят в API, далее — цепочка кадров.</p>
+          </div>
+          <div class="characters-actions">
+            <label class="btn ghost sm">
+              + Персонаж
+              <input type="file" accept="image/*" multiple hidden id="globalCharUpload" />
+            </label>
+            <button class="btn ghost sm" id="btnApplyCharsAll" type="button">На все клипы</button>
+          </div>
+        </div>
+        <div id="globalCharacters" class="refs global-refs">
+          <span class="muted small">Нет персонажей</span>
+        </div>
+      </div>
+
+      <div id="clipsContainer" class="clips-grid"></div>
+      <div class="actions">
+        <button class="btn ghost" id="btnBack1">← Назад</button>
+        <button class="btn primary" id="btnToStep3">Начать генерацию →</button>
+      </div>
+    </section>
+
+    <section class="panel" id="step3">
+      <h1>Генерация</h1>
+      <p class="subtitle">Можно закрыть вкладку — готовые клипы сохраняются. При сбое нажмите «Продолжить» снова.</p>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-text" id="progressText">Ожидание...</div>
+        <div class="progress-text muted" id="costText"></div>
+      </div>
+      <div id="finalVideoWrap" class="final-video hidden">
+        <h3>Итоговое видео</h3>
+        <video id="finalVideo" controls></video>
+      </div>
+      <div id="generationList" class="gen-list"></div>
+      <div class="actions">
+        <button class="btn danger" id="btnCancel" disabled>Отменить</button>
+        <button class="btn ghost" id="btnNewProject">Новый проект</button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>FrameFlow v1.0</span>
+      <a href="https://github.com/skintar/FrameFlow" target="_blank" rel="noopener">GitHub</a>
+    </footer>
+  </div>
+  <script src="/static/app.js?v=1"></script>
+</body>
+</html>
